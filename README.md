@@ -2,7 +2,67 @@
 
 This repo is a fork of LLVM and contains the backend target for the Super Home Video Computer!
 
-Okay, it's really just the SNES/SFC.
+Okay, it's really just the SNES/SFC (Ricoh 5A22 / WDC 65816 CPU).
+
+## SVHC Target Overview
+
+### Target Triples
+* **Canonical Bare-Metal Triple:** `svhc-unknown-none-elf` *(Recommended for SNES ROM / firmware dev)*
+* **Generic Triple:** `svhc-unknown-unknown-elf`
+* **Shorthand:** `svhc` (e.g., `llc -mtriple=svhc input.ll -o output.s`)
+
+### Data Layout Specification
+```text
+e-m:e-p:16:16-i32:16-i64:16-f32:16-f64:16-a:8-n8:16-S16
+```
+| Specifier | Description |
+| :--- | :--- |
+| `e` | Little-endian byte order |
+| `m:e` | ELF-style symbol mangling |
+| `p:16:16` | 16-bit pointers with 16-bit ABI alignment in address space 0 |
+| `i32:16` | 32-bit integers aligned to 16-bit boundaries |
+| `i64:16` | 64-bit integers aligned to 16-bit boundaries |
+| `f32:16` | 32-bit floating point numbers aligned to 16-bit boundaries |
+| `f64:16` | 64-bit floating point numbers aligned to 16-bit boundaries |
+| `a:8` | Minimum aggregate alignment of 8 bits (1 byte) |
+| `n8:16` | Native CPU integer register widths (8-bit and 16-bit operations) |
+| `S16` | Stack pointer aligned to 16 bits (2 bytes) |
+
+### Directory Structure
+The SVHC backend is housed under `llvm/lib/Target/SVHC/`:
+
+```text
+llvm/lib/Target/SVHC/
+├── CMakeLists.txt                # Builds SVHCCodeGen & drives TableGen
+├── SVHC.h                        # Target-wide declarations
+├── SVHC.td                       # Top-level TableGen target definition (processors & ISA)
+├── SVHCInstrFormats.td           # Instruction formats & pseudo-instructions
+├── SVHCInstrInfo.td              # TableGen instruction descriptions
+├── SVHCRegisterInfo.td           # 65816 registers (A, X, Y, SP, DP, PC, PBR, DBR, P)
+├── SVHCTargetMachine.h           # SVHCTargetMachine class declaration
+├── SVHCTargetMachine.cpp         # TargetMachine implementation & registration
+├── MCTargetDesc/                 # Machine Code (MC) layer
+│   ├── CMakeLists.txt            # Builds LLVMSVHCDesc
+│   ├── SVHCMCAsmInfo.h           # Assembly info header
+│   ├── SVHCMCAsmInfo.cpp         # Assembly syntax, comments, pointer sizes
+│   ├── SVHCMCTargetDesc.h        # Enums for registers, instructions, and subtarget
+│   └── SVHCMCTargetDesc.cpp      # TargetRegistry registrations for MC layer
+└── TargetInfo/                   # Target discovery & registration
+    ├── CMakeLists.txt            # Builds LLVMSVHCInfo
+    ├── SVHCTargetInfo.h          # Target declaration (getTheSVHCTarget)
+    └── SVHCTargetInfo.cpp        # Target registration with LLVM TargetRegistry
+```
+
+### Building the Target
+To configure CMake to include the experimental SVHC target:
+```bash
+cmake -S llvm -B build -G Ninja \
+  -DCMAKE_BUILD_TYPE=Release \
+  -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD="SVHC"
+ninja -C build llc
+```
+
+---
 
 # The LLVM Compiler Infrastructure
 
