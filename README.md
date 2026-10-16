@@ -1,3 +1,9 @@
+# Super Home Video Computer Compiler
+
+This repo is a fork of LLVM and contains the backend target for the Super Home Video Computer!
+
+Okay, it's really just the SNES/SFC.
+
 # The LLVM Compiler Infrastructure
 
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/llvm/llvm-project/badge)](https://securityscorecards.dev/viewer/?uri=github.com/llvm/llvm-project)
