@@ -54,12 +54,16 @@ llvm/lib/Target/SVHC/
 ```
 
 ### Building the Target
-To configure CMake to include the experimental SVHC target:
+To configure CMake to include the experimental SVHC target and clang:
 ```bash
 cmake -S llvm -B build -G Ninja \
   -DCMAKE_BUILD_TYPE=Release \
-  -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD="SVHC"
-ninja -C build llc
+  -DLLVM_ENABLE_PROJECTS="clang" \
+  -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD="SVHC" \
+  -DLLVM_USE_LINKER=lld \
+  -DLLVM_CCACHE_BUILD=ON \
+  -DLLVM_OPTIMIZED_TS_TABLEGEN=ON
+ninja -C build -j4
 ```
 
 ---
