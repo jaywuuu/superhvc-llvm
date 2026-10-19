@@ -15,3 +15,10 @@ include "SVHCInstrFormats.td"
 def NOP : SVHCInst<(outs), (ins), "nop", []> {
   let Inst{7-0} = 0xea;
 }
+
+//===----------------------------------------------------------------------===//
+// SVHC Specific InstrInfo class
+//===----------------------------------------------------------------------===//
+
+//class SVHCInstrInfo : InstrInfo {
+//}

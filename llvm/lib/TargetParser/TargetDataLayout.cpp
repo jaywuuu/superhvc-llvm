@@ -628,7 +628,6 @@ std::string Triple::computeDataLayout(StringRef ABIName) const {
   case Triple::mips64el:
     return computeMipsDataLayout(*this, ABIName);
   case Triple::msp430:
-  case Triple::svhc:
     return "e-m:e-p:16:16-i32:16-i64:16-f32:16-f64:16-a:8-n8:16-S16";
   case Triple::ppc:
   case Triple::ppcle:
@@ -699,6 +698,9 @@ std::string Triple::computeDataLayout(StringRef ABIName) const {
     // These are all virtual ISAs with no LLVM backend, and therefore no fixed
     // LLVM data layout.
     return "";
+
+  case Triple::svhc:
+    return "e-m:e-p:16:8-p1:24:8-i16:8-i24:8-i32:8-i64:8-f32:8-f64:8-a:8-n8:16-S8";
 
   case Triple::UnknownArch:
     return "";

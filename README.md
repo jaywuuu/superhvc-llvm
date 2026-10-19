@@ -13,20 +13,23 @@ Okay, it's really just the SNES/SFC (Ricoh 5A22 / WDC 65816 CPU).
 
 ### Data Layout Specification
 ```text
-e-m:e-p:16:16-i32:16-i64:16-f32:16-f64:16-a:8-n8:16-S16
+e-m:e-p:16:8-p1:24:8-i16:8-i24:8-i32:8-i64:8-f32:8-f64:8-a:8-n8:16-S8
 ```
 | Specifier | Description |
 | :--- | :--- |
 | `e` | Little-endian byte order |
 | `m:e` | ELF-style symbol mangling |
-| `p:16:16` | 16-bit pointers with 16-bit ABI alignment in address space 0 |
-| `i32:16` | 32-bit integers aligned to 16-bit boundaries |
-| `i64:16` | 64-bit integers aligned to 16-bit boundaries |
-| `f32:16` | 32-bit floating point numbers aligned to 16-bit boundaries |
-| `f64:16` | 64-bit floating point numbers aligned to 16-bit boundaries |
+| `p:16:8` | 16-bit pointers with 8-bit ABI alignment in address space 0 (near pointers) |
+| `p1:24:8` | 24-bit pointers with 8-bit ABI alignment in address space 1 (far pointers) |
+| `i16:8` | 16-bit integers aligned to 8-bit boundaries (byte-aligned) |
+| `i24:8` | 24-bit integers aligned to 8-bit boundaries (byte-aligned) |
+| `i32:8` | 32-bit integers aligned to 8-bit boundaries (byte-aligned) |
+| `i64:8` | 64-bit integers aligned to 8-bit boundaries (byte-aligned) |
+| `f32:8` | 32-bit floating point numbers aligned to 8-bit boundaries |
+| `f64:8` | 64-bit floating point numbers aligned to 8-bit boundaries |
 | `a:8` | Minimum aggregate alignment of 8 bits (1 byte) |
 | `n8:16` | Native CPU integer register widths (8-bit and 16-bit operations) |
-| `S16` | Stack pointer aligned to 16 bits (2 bytes) |
+| `S8` | Stack pointer aligned to 8 bits (1 byte) |
 
 ### Directory Structure
 The SVHC backend is housed under `llvm/lib/Target/SVHC/`:
@@ -54,17 +57,79 @@ llvm/lib/Target/SVHC/
 ```
 
 ### Building the Target
-To configure CMake to include the experimental SVHC target and clang:
+
+A Makefile wrapper is provided at the repository root to simplify configuration, compilation, and testing.
+
+#### Quick Start (Default: RelWithDebInfo, 4 parallel jobs)
+```bash
+make
+```
+
+#### Build Types
+The Makefile defaults to `RelWithDebInfo`, and supports `Release` and `Debug`:
+```bash
+# RelWithDebInfo (default)
+make relwithdebinfo
+
+# Release
+make release
+
+# Debug
+make debug
+
+# Or override via BUILD_TYPE
+make BUILD_TYPE=Debug
+```
+
+#### Running Tests
+```bash
+# Run all regression tests (LLVM + Clang)
+make test
+
+# Run LLVM regression tests only
+make check-llvm
+
+# Run Clang regression tests only
+make check-clang
+```
+
+#### Common Workflow Options
+```bash
+# Build a specific target only (e.g. llc or clang)
+make TARGET=llc
+
+# Adjust parallel compilation jobs (default: 4)
+make JOBS=8
+
+# Force re-running CMake configuration
+make configure
+
+# Clean build artifacts or remove build directory
+make clean
+make distclean
+
+# Show all available targets and variables
+make help
+```
+
+> **Note on TableGen (`.td`) changes:** Editing any TableGen file (e.g., `SVHC.td`, `SVHCInstrInfo.td`, `SVHCRegisterInfo.td`) does **not** require reconfiguring CMake. Simply run `make` (or `make TARGET=llc`); Ninja automatically detects TableGen dependency changes, regenerates the corresponding `.inc` files, and recompiles affected C++ files.
+
+<details>
+<summary>Manual CMake Command (Under the Hood)</summary>
+
+If you prefer running CMake and Ninja directly:
 ```bash
 cmake -S llvm -B build -G Ninja \
-  -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_BUILD_TYPE=RelWithDebInfo \
   -DLLVM_ENABLE_PROJECTS="clang" \
+  -DLLVM_TARGETS_TO_BUILD="X86" \
   -DLLVM_EXPERIMENTAL_TARGETS_TO_BUILD="SVHC" \
   -DLLVM_USE_LINKER=lld \
   -DLLVM_CCACHE_BUILD=ON \
   -DLLVM_OPTIMIZED_TS_TABLEGEN=ON
 ninja -C build -j4
 ```
+</details>
 
 ---
 

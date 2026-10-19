@@ -37,6 +37,8 @@ include "SVHCRegisterInfo.td"
 
 include "SVHCInstrInfo.td"
 
+defm : RemapAllTargetPseudoPointerOperands<IDXR>;
+
 def SVHCInstrInfo : InstrInfo;
 
 //===----------------------------------------------------------------------===//

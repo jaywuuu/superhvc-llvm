@@ -30,5 +30,16 @@ def DBR : SVHCReg<7, "dbr">, DwarfRegNum<[7]>;
 def P   : SVHCReg<8, "p">,   DwarfRegNum<[8]>;
 
 // Register classes
-def GR16 : RegisterClass<"SVHC", [i16], 16, (add A, X, Y, SP, DP, PC)>;
-def GR8  : RegisterClass<"SVHC", [i8], 8, (add PBR, DBR, P)>;
+// Each specialized register gets its own class so LLVM knows they aren't interchangeable.
+// Accumulator
+def ACC : RegisterClass<"SVHC", [i16, i8], 16, (add A)>;
+
+// Combined Index Class
+def IDXR : RegisterClass<"SVHC", [i16, i8], 16, (add X, Y)>;
+
+// Stack Pointer and Direct Page
+def SPR : RegisterClass<"SVHC", [i16], 16, (add SP)>;
+def DPR : RegisterClass<"SVHC", [i16], 16, (add DP)>;
+
+// Program Counter
+def PCR : RegisterClass<"SVHC", [i16], 16, (add PC)>;
